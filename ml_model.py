@@ -18,6 +18,8 @@ class MLModel:
     
     def prepare_data(self, df):
         df = add_technical_features(df)
+        if df is None or df.empty:
+            return None, None
         df['target'] = (df['close'].shift(-1) > df['close']).astype(int)
         df = df.dropna()
         if len(df) < 50:
@@ -52,10 +54,11 @@ class MLModel:
     def predict_probability(self, df):
         if not self.is_trained or self.model is None:
             return None
-        df_feat = add_technical_features(df.tail(100)).iloc[-1:]
-        if len(df_feat) == 0:
+        df_feat = add_technical_features(df.tail(100))
+        if df_feat is None or df_feat.empty:
             return None
-        X = df_feat[self.feature_cols].values
+        last_row = df_feat.iloc[-1:]
+        X = last_row[self.feature_cols].values
         X_scaled = self.scaler.transform(X)
         prob = self.model.predict_proba(X_scaled)[0][1]
         return float(prob)

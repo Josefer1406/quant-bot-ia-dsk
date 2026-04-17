@@ -11,48 +11,38 @@ def generate_signal(symbol, df):
     
     df_feat = add_technical_features(df)
     if df_feat is None or df_feat.empty or len(df_feat) < 2:
+        print(f"   ⚠️ {symbol}: features vacías")
         return None, 0.0, 0.0
     
-    try:
-        last = df_feat.iloc[-1]
-    except (IndexError, AttributeError):
-        return None, 0.0, 0.0
-    
-    # Extraer valores
-    ema_21 = last.get('sma_21', last.get('close', 0))
-    ema_50 = last.get('sma_50', 0)
-    ema_200 = last.get('sma_200', 0)
+    last = df_feat.iloc[-1]
+    # Valores seguros
+    sma21 = last.get('sma_21', 0)
+    sma50 = last.get('sma_50', 0)
+    sma200 = last.get('sma_200', 0)
     close = last.get('close', 0)
-    returns_5 = last.get('returns_5', 0)
+    returns5 = last.get('returns_5', 0)
     
     # Score técnico
-    if ema_50 == 0 or ema_200 == 0:
-        trend_bull = False
-    else:
-        trend_bull = ema_21 > ema_50 > ema_200
+    trend_bull = (sma21 > sma50 > sma200) if sma50 != 0 and sma200 != 0 else False
+    price_above_sma = close > sma21 if sma21 != 0 else False
+    momentum = returns5 > 0 if not pd.isna(returns5) else False
+    tech_score = (trend_bull * 0.4) + (price_above_sma * 0.3) + (momentum * 0.3)
     
-    price_above_ema = close > ema_21 if ema_21 != 0 else False
-    momentum_positive = returns_5 > 0 if not pd.isna(returns_5) else False
-    
-    tech_score = (trend_bull * 0.4) + (price_above_ema * 0.3) + (momentum_positive * 0.3)
-    
-    # ML probability
+    # ML
     ml_prob = ml_model.predict_probability(df)
     if ml_prob is None:
         ml_prob = 0.5
     
-    combined_prob = 0.6 * ml_prob + 0.4 * tech_score
+    combined = 0.6 * ml_prob + 0.4 * tech_score
     regime = detect_market_regime(df)
     regime_factor = get_regime_multiplier(regime)
-    adjusted_prob = combined_prob * regime_factor
-    adjusted_prob = min(0.95, max(0.05, adjusted_prob))
-    final_score = (adjusted_prob * 0.7) + (tech_score * 0.3)
+    prob = combined * regime_factor
+    prob = min(0.95, max(0.05, prob))
+    score = (prob * 0.7) + (tech_score * 0.3)
     
-    # Log para depuración (se verá en Railway)
-    print(f"   📊 {symbol}: tech={tech_score:.2f} | ml={ml_prob:.2f} | comb={combined_prob:.2f} | reg={regime_factor:.2f} | adj={adjusted_prob:.2f} | score={final_score:.2f}")
+    print(f"   📊 {symbol}: tech={tech_score:.2f} ml={ml_prob:.2f} prob={prob:.2f} score={score:.2f}")
     
-    if adjusted_prob < config.SIGNAL_MIN_PROBABILITY or final_score < config.SIGNAL_MIN_SCORE:
-        return None, adjusted_prob, final_score
-    
-    print(f"   ✅ {symbol}: SEÑAL DE COMPRA! prob={adjusted_prob:.2f} score={final_score:.2f}")
-    return 'buy', adjusted_prob, final_score
+    if prob < config.SIGNAL_MIN_PROBABILITY or score < config.SIGNAL_MIN_SCORE:
+        return None, prob, score
+    print(f"   ✅ {symbol}: SEÑAL COMPRA!")
+    return 'buy', prob, score

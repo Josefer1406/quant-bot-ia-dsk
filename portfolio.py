@@ -1,11 +1,8 @@
 import json
 import time
-import pandas as pd
 import numpy as np
 from collections import deque
 import config
-from risk_manager import calculate_dynamic_stops, position_size
-from regime_detector import detect_market_regime
 
 class Portfolio:
     def __init__(self):
@@ -41,9 +38,6 @@ class Portfolio:
             print(f"📀 Estado cargado: Capital ${self.capital:.2f}, {len(self.positions)} posiciones")
         except:
             pass
-    
-    def can_open_position(self):
-        return (time.time() - self.last_trade_time) > self.cooldown
     
     def update_cooldown(self):
         if len(self.trades_history) < 10:

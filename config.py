@@ -1,53 +1,87 @@
+# ============================================
+# BOT QUANT INSTITUCIONAL - VERSIÓN FINAL
+# ============================================
+
 SIMULATION_MODE = True
-EXCHANGE_NAME = "bybit"
+DATA_SOURCE = "coingecko"   # coingecko, binance, okx, bybit (solo coingecko funciona 100%)
+
+# API Key de CoinGecko (gratuita, regístrate en coingecko.com)
+COINGECKO_API_KEY = "CG-kLdtAHJWmg3w684oGEbZgQHJ"  # <--- REEMPLAZA CON TU CLAVE
 
 CAPITAL_INICIAL = 1000
 MAX_POSICIONES = 4
 MAX_CAPITAL_USO = 0.60
 
-TIMEFRAME = "5m"
-CYCLE_SECONDS = 10
-HISTORY_LIMIT = 200
+TIMEFRAME = "5m"           # 5m, 15m, 1h, 4h, 1d
+CYCLE_SECONDS = 30         # Escaneo cada 30 segundos
+HISTORY_LIMIT = 200        # Velas para análisis
 
+# Universo de activos (IDs de CoinGecko)
 UNIVERSE = [
-    "BTC/USDT", "ETH/USDT", "SOL/USDT", "ADA/USDT", "DOGE/USDT",
-    "LINK/USDT", "DOT/USDT", "AAVE/USDT", "UNI/USDT", "MATIC/USDT"
+    "bitcoin", "ethereum", "solana", "cardano", "dogecoin",
+    "chainlink", "polkadot", "aave", "uniswap", "polygon"
 ]
-MIN_AVG_VOLUME_USD = 10_000_000
-
-DEFAULT_ATR_PERIOD = 14
-DEFAULT_STOP_MULTIPLIER = 1.2
-DEFAULT_TAKE_MULTIPLIER = 2.5
-MAX_STOP_PERCENT = 0.03
-MIN_STOP_PERCENT = 0.005
-
-KELLY_FRACTION = 0.15
-MAX_POSITION_SIZE_PCT = 0.08
-MIN_POSITION_SIZE_PCT = 0.02
-
-COOLDOWN_BASE = 30
-COOLDOWN_MAX = 90
-COOLDOWN_MIN = 10
-
-SIGNAL_MIN_RSI = 30
-SIGNAL_MAX_RSI = 70
-SIGNAL_MIN_TREND_SCORE = 0.5
-
-CORRELATION_GROUPS = {
-    "L1": ["BTC/USDT", "ETH/USDT"],
-    "L2": ["SOL/USDT"],
-    "L3": ["ADA/USDT"],
-    "MEME": ["DOGE/USDT"],
-    "L4": ["LINK/USDT"],
-    "L5": ["DOT/USDT"],
-    "L6": ["AAVE/USDT", "UNI/USDT"],
-    "L7": ["MATIC/USDT"],
+# Símbolos para mostrar (opcional)
+SYMBOL_MAP = {
+    "bitcoin": "BTC/USDT",
+    "ethereum": "ETH/USDT",
+    "solana": "SOL/USDT",
+    "cardano": "ADA/USDT",
+    "dogecoin": "DOGE/USDT",
+    "chainlink": "LINK/USDT",
+    "polkadot": "DOT/USDT",
+    "aave": "AAVE/USDT",
+    "uniswap": "UNI/USDT",
+    "polygon": "MATIC/USDT"
 }
 
-MODEL_PATH = "model.pkl"
+# ========== DETECCIÓN DE MERCADO ==========
+ADX_PERIOD = 14
+TREND_STRENGTH_THRESHOLD = 25
+
+# ========== ML ==========
+ML_RETRAIN_EVERY_TRADES = 30
+ML_MIN_TRADES_FOR_TRAIN = 30
+ML_FEATURES = ['rsi', 'macd', 'bb_width', 'volume_ratio', 'trend_strength', 'volatility']
+
+# ========== RIESGO DINÁMICO ==========
+DEFAULT_ATR_PERIOD = 14
+DEFAULT_STOP_MULTIPLIER = 1.5
+DEFAULT_TAKE_MULTIPLIER = 2.5
+MAX_STOP_PERCENT = 0.05
+MIN_STOP_PERCENT = 0.01
+
+# ========== GESTIÓN DE CAPITAL ==========
+KELLY_FRACTION = 0.25
+MAX_POSITION_SIZE_PCT = 0.15
+MIN_POSITION_SIZE_PCT = 0.03
+
+# ========== COOLDOWN ==========
+COOLDOWN_BASE = 20
+COOLDOWN_MAX = 60
+COOLDOWN_MIN = 10
+
+# ========== FILTROS ANTIBASURA ==========
+MIN_VOLUME_USD = 10_000_000
+MIN_PRICE_CHANGE_PCT = 0.5
+MAX_VOLATILITY = 0.15
+
+# ========== CORRELACIÓN ==========
+CORRELATION_GROUPS = {
+    "L1": ["bitcoin", "ethereum"],
+    "L2": ["solana"],
+    "L3": ["cardano", "polygon"],
+    "MEME": ["dogecoin"],
+    "L4": ["chainlink", "polkadot"],
+    "L5": ["aave", "uniswap"],
+}
+
+# ========== UMBRALES DE SEÑAL ==========
+SIGNAL_MIN_PROBABILITY = 0.65
+SIGNAL_MIN_SCORE = 0.70
+
+# ========== ARCHIVOS ==========
+MODEL_PATH = "xgboost_model.pkl"
 SCALER_PATH = "scaler.pkl"
 TRADES_LOG = "trades.csv"
 PORTFOLIO_STATE = "portfolio_state.json"
-
-BYBIT_API_KEY = ""
-BYBIT_SECRET_KEY = ""

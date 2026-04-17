@@ -1,5 +1,5 @@
 # ============================================
-# CONFIGURACIÓN - VERSIÓN INTERMEDIA (FLEXIBLE PERO SELECTIVA)
+# CONFIGURACIÓN INTERMEDIA (FLEXIBLE PERO SELECTIVA)
 # ============================================
 
 SIMULATION_MODE = True
@@ -37,7 +37,6 @@ COOLDOWN_BASE = 30
 COOLDOWN_MAX = 90
 COOLDOWN_MIN = 10
 
-# UMBRALES INTERMEDIOS (ni muy bajos ni muy altos)
 SIGNAL_MIN_PROBABILITY = 0.45
 SIGNAL_MIN_SCORE = 0.50
 

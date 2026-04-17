@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 def detect_market_regime(df, lookback=100):
     if len(df) < lookback:
@@ -22,15 +21,11 @@ def detect_market_regime(df, lookback=100):
             return 'bull'
         elif slope < -0.02:
             return 'bear'
-        else:
-            return 'lateral'
-    else:
-        return 'lateral'
+    return 'lateral'
 
 def get_regime_multiplier(regime):
     if regime == 'bull':
         return 1.2
     elif regime == 'bear':
         return 0.7
-    else:
-        return 0.9
+    return 0.9

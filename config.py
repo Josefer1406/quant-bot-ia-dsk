@@ -1,35 +1,36 @@
 # ============================================
-# BOT QUANT INSTITUCIONAL - COINCAP (SIN BLOQUEO)
+# BOT QUANT INSTITUCIONAL - YAHOO FINANCE
 # ============================================
 
 SIMULATION_MODE = True
-DATA_SOURCE = "coincap"
+DATA_SOURCE = "yfinance"
 
 CAPITAL_INICIAL = 1000
-MAX_POSICIONES = 3          # Reducido para menos operaciones
+MAX_POSICIONES = 3
 MAX_CAPITAL_USO = 0.60
 
-TIMEFRAME = "m5"            # CoinCap: m5 = 5 minutos
-CYCLE_SECONDS = 90          # 90 segundos entre ciclos (conservador)
+TIMEFRAME = "5m"
+CYCLE_SECONDS = 60
 HISTORY_LIMIT = 100
 
-# Universo pequeño (3 activos) para pruebas
+# Símbolos de Yahoo Finance (criptomonedas)
 UNIVERSE = [
-    "bitcoin", "ethereum", "solana"
+    "BTC-USD", "ETH-USD", "SOL-USD", "ADA-USD", "DOGE-USD"
 ]
 SYMBOL_MAP = {
-    "bitcoin": "BTC/USDT",
-    "ethereum": "ETH/USDT",
-    "solana": "SOL/USDT"
+    "BTC-USD": "BTC/USDT",
+    "ETH-USD": "ETH/USDT",
+    "SOL-USD": "SOL/USDT",
+    "ADA-USD": "ADA/USDT",
+    "DOGE-USD": "DOGE/USDT"
 }
 
-# Resto de configuraciones igual...
+# Parámetros técnicos
 ADX_PERIOD = 14
 TREND_STRENGTH_THRESHOLD = 25
 
 ML_RETRAIN_EVERY_TRADES = 30
 ML_MIN_TRADES_FOR_TRAIN = 30
-ML_FEATURES = ['rsi', 'macd', 'bb_width', 'volume_ratio', 'trend_strength', 'volatility']
 
 DEFAULT_ATR_PERIOD = 14
 DEFAULT_STOP_MULTIPLIER = 1.5
@@ -45,13 +46,11 @@ COOLDOWN_BASE = 20
 COOLDOWN_MAX = 60
 COOLDOWN_MIN = 10
 
-MIN_VOLUME_USD = 10_000_000
-MIN_PRICE_CHANGE_PCT = 0.5
-MAX_VOLATILITY = 0.15
-
 CORRELATION_GROUPS = {
-    "L1": ["bitcoin", "ethereum"],
-    "L2": ["solana"],
+    "L1": ["BTC-USD", "ETH-USD"],
+    "L2": ["SOL-USD"],
+    "L3": ["ADA-USD"],
+    "MEME": ["DOGE-USD"],
 }
 
 SIGNAL_MIN_PROBABILITY = 0.65
@@ -61,6 +60,3 @@ MODEL_PATH = "xgboost_model.pkl"
 SCALER_PATH = "scaler.pkl"
 TRADES_LOG = "trades.csv"
 PORTFOLIO_STATE = "portfolio_state.json"
-
-# No necesitas API key para CoinCap
-COINGECKO_API_KEY = ""

@@ -35,7 +35,7 @@ class Portfolio:
             self.trades_history = state.get('trades_history', [])
             self.last_trade_time = state.get('last_trade_time', 0)
             self.cooldown = state.get('cooldown', config.COOLDOWN_BASE)
-            print(f"📀 Estado cargado: Capital ${self.capital:.2f}, {len(self.positions)} posiciones, {len(self.trades_history)} trades")
+            print(f"📀 Estado cargado: Capital ${self.capital:.2f}, {len(self.positions)} posiciones")
         except:
             pass
     
@@ -67,10 +67,10 @@ class Portfolio:
         avg_loss = abs(np.mean(losses)) if losses else 0.01
         return avg_win, avg_loss
     
-    def add_position(self, coin_id, entry_price, quantity, stop_loss, take_profit, score, timestamp):
+    def add_position(self, symbol, entry_price, quantity, stop_loss, take_profit, score, timestamp):
         if len(self.positions) >= config.MAX_POSICIONES:
             return False
-        self.positions[coin_id] = {
+        self.positions[symbol] = {
             'entry': entry_price,
             'quantity': quantity,
             'investment': quantity * entry_price,
@@ -85,12 +85,12 @@ class Portfolio:
         self.save_state()
         return True
     
-    def close_position(self, coin_id, exit_price, reason):
-        pos = self.positions.pop(coin_id)
+    def close_position(self, symbol, exit_price, reason):
+        pos = self.positions.pop(symbol)
         pnl = (exit_price - pos['entry']) / pos['entry']
         self.capital += pos['quantity'] * exit_price
         trade_record = {
-            'symbol': coin_id,
+            'symbol': symbol,
             'entry': pos['entry'],
             'exit': exit_price,
             'pnl': pnl,
@@ -102,19 +102,19 @@ class Portfolio:
         self.trades_history.append(trade_record)
         self.winrate_history.append(1 if pnl > 0 else 0)
         self.save_state()
-        print(f"   🔴 CERRAR {coin_id} | PnL {pnl*100:.2f}% | {reason} | Capital: ${self.capital:.2f}")
+        print(f"🔴 CERRAR {symbol} | PnL {pnl*100:.2f}% | {reason}")
         return pnl
     
     def update_positions(self, current_prices):
-        for coin_id, pos in list(self.positions.items()):
-            price = current_prices.get(coin_id)
+        for symbol, pos in list(self.positions.items()):
+            price = current_prices.get(symbol)
             if price is None:
                 continue
             if price > pos['max_price']:
                 pos['max_price'] = price
             if price <= pos['stop_loss']:
-                self.close_position(coin_id, price, 'stop_loss')
+                self.close_position(symbol, price, 'stop_loss')
             elif price >= pos['take_profit']:
-                self.close_position(coin_id, price, 'take_profit')
+                self.close_position(symbol, price, 'take_profit')
 
 portfolio = Portfolio()

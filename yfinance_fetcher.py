@@ -7,7 +7,7 @@ import config
 class YahooFinanceFetcher:
     def __init__(self):
         self.last_request_time = 0
-        self.min_interval = 0.5  # 0.5 segundos entre peticiones
+        self.min_interval = 0.5
     
     def _rate_limit_wait(self):
         elapsed = time.time() - self.last_request_time
@@ -16,11 +16,6 @@ class YahooFinanceFetcher:
         self.last_request_time = time.time()
     
     def fetch_ohlcv(self, symbol, period="7d", interval="5m"):
-        """
-        Obtiene velas de Yahoo Finance.
-        symbol: 'BTC-USD', 'ETH-USD', etc.
-        interval: '1m', '5m', '15m', '30m', '1h', '1d', etc.
-        """
         self._rate_limit_wait()
         try:
             ticker = yf.Ticker(symbol)
@@ -28,7 +23,6 @@ class YahooFinanceFetcher:
             if df.empty:
                 print(f"⚠️ Sin datos para {symbol}")
                 return None
-            # Reset index para tener timestamp como columna
             df = df.reset_index()
             df.rename(columns={
                 'Datetime': 'timestamp',
@@ -39,7 +33,6 @@ class YahooFinanceFetcher:
                 'Volume': 'volume'
             }, inplace=True)
             df['timestamp'] = pd.to_datetime(df['timestamp'])
-            # Tomar solo las últimas 'limit' velas
             if len(df) > config.HISTORY_LIMIT:
                 df = df.tail(config.HISTORY_LIMIT)
             print(f"📥 {symbol}: {len(df)} velas ({interval})")

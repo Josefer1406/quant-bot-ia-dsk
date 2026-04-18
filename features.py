@@ -6,7 +6,7 @@ def add_technical_features(df):
     if df is None or len(df) < 30:
         return df
     df = df.copy()
-    # Medias móviles
+    # SMA
     for period in [7, 14, 21, 50]:
         if len(df) >= period:
             df[f'sma_{period}'] = df['close'].rolling(period).mean()
@@ -22,15 +22,13 @@ def add_technical_features(df):
     df['macd'] = exp1 - exp2
     df['macd_signal'] = df['macd'].ewm(span=9, adjust=False).mean()
     df['macd_diff'] = df['macd'] - df['macd_signal']
-    # Bollinger Bands
+    # Bollinger
     df['bb_mid'] = df['close'].rolling(20).mean()
     bb_std = df['close'].rolling(20).std()
     df['bb_upper'] = df['bb_mid'] + 2 * bb_std
     df['bb_lower'] = df['bb_mid'] - 2 * bb_std
     df['bb_width'] = (df['bb_upper'] - df['bb_lower']) / df['bb_mid']
-    # ATR (simulado con high/low = close ± 0.1%)
-    df['high'] = df['close'] * 1.001
-    df['low'] = df['close'] * 0.999
+    # ATR
     high_low = df['high'] - df['low']
     high_close = abs(df['high'] - df['close'].shift())
     low_close = abs(df['low'] - df['close'].shift())
@@ -39,9 +37,7 @@ def add_technical_features(df):
     # Retornos
     df['returns_1'] = df['close'].pct_change()
     df['returns_5'] = df['close'].pct_change(5)
-    # Volumen simulado (constante)
-    df['volume_ratio'] = 1.0
-    # Volatilidad
+    df['volume_ratio'] = df['volume'] / (df['volume'].rolling(20).mean() + 1e-9)
     df['volatility'] = df['returns_1'].rolling(20).std()
     # ADX simplificado
     plus_dm = df['high'].diff()
@@ -53,7 +49,6 @@ def add_technical_features(df):
     minus_di = 100 * minus_dm.rolling(14).mean() / tr
     dx = 100 * abs(plus_di - minus_di) / (plus_di + minus_di + 1e-9)
     df['adx'] = dx.rolling(14).mean()
-    # Precio relativo a SMA21
     df['price_vs_sma_21'] = (df['close'] - df['sma_21']) / df['sma_21']
     return df.dropna()
 

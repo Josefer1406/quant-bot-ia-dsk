@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 import threading
 import time
 import config
-from coincap_fetcher import fetcher   # <--- CAMBIO AQUÍ
+from yfinance_fetcher import fetcher
 from signal_generator import generate_signal
 from portfolio import portfolio
 from risk_manager import calculate_dynamic_stops, position_size
@@ -15,20 +15,20 @@ trade_counter = 0
 def refresh_data():
     prices = {}
     dataframes = {}
-    for coin_id in config.UNIVERSE:
-        df = fetcher.fetch_ohlcv(coin_id, interval=config.TIMEFRAME, limit=config.HISTORY_LIMIT)
-        if df is not None and len(df) >= 50:
-            dataframes[coin_id] = df
-            price = fetcher.fetch_current_price(coin_id)
-            prices[coin_id] = price if price > 0 else df['close'].iloc[-1]
+    for symbol in config.UNIVERSE:
+        df = fetcher.fetch_ohlcv(symbol, period="7d", interval=config.TIMEFRAME)
+        if df is not None and len(df) >= 30:
+            dataframes[symbol] = df
+            price = fetcher.fetch_current_price(symbol)
+            prices[symbol] = price if price > 0 else df['close'].iloc[-1]
         else:
-            print(f"⚠️ Datos insuficientes para {coin_id}")
-        time.sleep(0.5)  # pausa entre activos
+            print(f"⚠️ Datos insuficientes para {symbol}")
+        time.sleep(0.3)
     return prices, dataframes
 
 def bot_loop():
     global trade_counter
-    print("🚀 BOT QUANT INSTITUCIONAL (CoinCap) INICIADO")
+    print("🚀 BOT QUANT INSTITUCIONAL (Yahoo Finance) INICIADO")
     while True:
         try:
             prices, dataframes = refresh_data()
@@ -38,10 +38,10 @@ def bot_loop():
             
             portfolio.update_positions(prices)
             signals = []
-            for coin_id, df in dataframes.items():
-                signal, prob, score = generate_signal(coin_id, df)
+            for symbol, df in dataframes.items():
+                signal, prob, score = generate_signal(symbol, df)
                 if signal:
-                    signals.append((coin_id, prob, score, df, prices[coin_id]))
+                    signals.append((symbol, prob, score, df, prices[symbol]))
             
             if not signals:
                 print("⛔ No hay señales")
@@ -49,17 +49,17 @@ def bot_loop():
                 continue
             
             signals.sort(key=lambda x: x[2], reverse=True)
-            for coin_id, prob, score, df, price in signals:
+            for symbol, prob, score, df, price in signals:
                 if len(portfolio.positions) >= config.MAX_POSICIONES:
                     break
                 # Correlación
                 grupo = None
                 for g, lst in config.CORRELATION_GROUPS.items():
-                    if coin_id in lst:
+                    if symbol in lst:
                         grupo = g
                         break
                 if grupo and any(s in portfolio.positions for s in config.CORRELATION_GROUPS.get(grupo, [])):
-                    print(f"⚠️ Correlación evitada: {coin_id}")
+                    print(f"⚠️ Correlación evitada: {symbol}")
                     continue
                 atr = df['atr'].iloc[-1] if 'atr' in df.columns else 0.01
                 stop_p, take_p, stop_pct, take_pct = calculate_dynamic_stops(price, atr)
@@ -67,11 +67,11 @@ def bot_loop():
                 if trade_capital < 30:
                     continue
                 quantity = trade_capital / price
-                executed = execute_buy(coin_id, quantity, price)
+                executed = execute_buy(symbol, quantity, price)
                 if executed:
-                    ok = portfolio.add_position(coin_id, executed['price'], quantity, stop_p, take_p, score, time.time())
+                    ok = portfolio.add_position(symbol, executed['price'], quantity, stop_p, take_p, score, time.time())
                     if ok:
-                        print(f"✅ COMPRA {coin_id} | ${trade_capital:.2f} | prob {prob:.2f}")
+                        print(f"✅ COMPRA {symbol} | ${trade_capital:.2f} | prob {prob:.2f}")
                         trade_counter += 1
             
             if trade_counter >= config.ML_RETRAIN_EVERY_TRADES:

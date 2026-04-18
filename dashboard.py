@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 st.set_page_config(page_title="Quant Dashboard", layout="wide")
 st.title("📊 Bot Quant Institucional - Dashboard")
 
-BOT_URL = st.secrets.get("BOT_URL", "https://tu-bot.up.railway.app/data")
+BOT_URL = st.secrets.get("BOT_URL", "https://quant-bot-ia-dsk-production.up.railway.app/data")
 
 @st.cache_data(ttl=5)
 def fetch_data():

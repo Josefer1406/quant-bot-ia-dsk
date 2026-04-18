@@ -1,9 +1,8 @@
 import numpy as np
 import config
 
-def detect_market_regime(df):
-    """bull, bear, lateral basado en ADX y pendiente de SMA200"""
-    if len(df) < 100:
+def detect_market_regime(df, lookback=100):
+    if len(df) < lookback:
         return 'lateral'
     last = df.iloc[-1]
     adx = last.get('adx', 20)

@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 import threading
 import time
 import config
-from coingecko_fetcher import fetcher
+from coincap_fetcher import fetcher   # <--- CAMBIO AQUÍ
 from signal_generator import generate_signal
 from portfolio import portfolio
 from risk_manager import calculate_dynamic_stops, position_size
@@ -16,19 +16,19 @@ def refresh_data():
     prices = {}
     dataframes = {}
     for coin_id in config.UNIVERSE:
-        df = fetcher.fetch_ohlcv(coin_id, timeframe=config.TIMEFRAME, limit=config.HISTORY_LIMIT)
+        df = fetcher.fetch_ohlcv(coin_id, interval=config.TIMEFRAME, limit=config.HISTORY_LIMIT)
         if df is not None and len(df) >= 50:
             dataframes[coin_id] = df
             price = fetcher.fetch_current_price(coin_id)
             prices[coin_id] = price if price > 0 else df['close'].iloc[-1]
         else:
             print(f"⚠️ Datos insuficientes para {coin_id}")
-        time.sleep(0.5)  # pequeña pausa entre activos
+        time.sleep(0.5)  # pausa entre activos
     return prices, dataframes
 
 def bot_loop():
     global trade_counter
-    print("🚀 BOT QUANT INSTITUCIONAL (CoinGecko Optimizado) INICIADO")
+    print("🚀 BOT QUANT INSTITUCIONAL (CoinCap) INICIADO")
     while True:
         try:
             prices, dataframes = refresh_data()

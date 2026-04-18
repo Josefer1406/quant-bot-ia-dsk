@@ -16,18 +16,19 @@ def refresh_data():
     prices = {}
     dataframes = {}
     for coin_id in config.UNIVERSE:
-        df = fetcher.fetch_ohlcv(coin_id, days=7)
-        if df is not None and len(df) > 50:
+        df = fetcher.fetch_ohlcv(coin_id, timeframe=config.TIMEFRAME, limit=config.HISTORY_LIMIT)
+        if df is not None and len(df) >= 50:
             dataframes[coin_id] = df
             price = fetcher.fetch_current_price(coin_id)
             prices[coin_id] = price if price > 0 else df['close'].iloc[-1]
         else:
             print(f"⚠️ Datos insuficientes para {coin_id}")
+        time.sleep(0.5)  # pequeña pausa entre activos
     return prices, dataframes
 
 def bot_loop():
     global trade_counter
-    print("🚀 BOT QUANT INSTITUCIONAL (CoinGecko) INICIADO")
+    print("🚀 BOT QUANT INSTITUCIONAL (CoinGecko Optimizado) INICIADO")
     while True:
         try:
             prices, dataframes = refresh_data()
@@ -60,7 +61,6 @@ def bot_loop():
                 if grupo and any(s in portfolio.positions for s in config.CORRELATION_GROUPS.get(grupo, [])):
                     print(f"⚠️ Correlación evitada: {coin_id}")
                     continue
-                # Calcular stops
                 atr = df['atr'].iloc[-1] if 'atr' in df.columns else 0.01
                 stop_p, take_p, stop_pct, take_pct = calculate_dynamic_stops(price, atr)
                 trade_capital, size_pct = position_size(portfolio.capital, prob, portfolio.get_historical_winrate())
@@ -74,7 +74,6 @@ def bot_loop():
                         print(f"✅ COMPRA {coin_id} | ${trade_capital:.2f} | prob {prob:.2f}")
                         trade_counter += 1
             
-            # Reentrenar ML cada ciertos trades
             if trade_counter >= config.ML_RETRAIN_EVERY_TRADES:
                 all_dfs = list(dataframes.values())
                 ml_model.train(all_dfs)

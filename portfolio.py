@@ -112,31 +112,43 @@ class Portfolio:
             if price is None:
                 continue
             pnl = (price - pos['entry']) / pos['entry']
-            if price > pos['max_price']:
-                pos['max_price'] = price
             
-            # Stop loss fijo
+            # 1. Stop loss (prioritario)
             if price <= pos['stop_loss']:
                 self.close_position(symbol, price, 'stop_loss')
                 continue
             
-            # Trailing stop mejorado
+            # 2. Take profit
+            if price >= pos['take_profit']:
+                self.close_position(symbol, price, 'take_profit')
+                continue
+            
+            # 3. Trailing stop (solo si se superó la activación)
             if pnl >= config.TRAILING_ACTIVATION:
-                pos['trailing'] = True
-            if pos.get('trailing', False):
-                # Trailing gap dinámico: si la ganancia es grande, reducir gap
-                if pnl > 0.05:
-                    gap = config.TRAILING_GAP * 0.5   # 0.5% si ganancia >5%
-                else:
-                    gap = config.TRAILING_GAP
-                stop = pos['max_price'] * (1 - gap)
-                if price <= stop:
+                # Actualizar máximo precio alcanzado
+                if price > pos.get('max_price', pos['entry']):
+                    pos['max_price'] = price
+                # Trailing gap dinámico: más agresivo si la ganancia es grande
+                gap = config.TRAILING_GAP
+                if pnl > 0.03:  # si ganancia > 3%
+                    gap = 0.003  # 0.3%
+                trailing_stop = pos['max_price'] * (1 - gap)
+                if price <= trailing_stop:
                     self.close_position(symbol, price, 'trailing_stop')
                     continue
+            else:
+                # Actualizar máximo incluso antes de activación
+                if price > pos.get('max_price', pos['entry']):
+                    pos['max_price'] = price
             
-            # Take profit normal (si no hay trailing activado)
-            if not pos.get('trailing', False) and price >= pos['take_profit']:
-                self.close_position(symbol, price, 'take_profit')
+            # 4. Timeout: cerrar después de 4 horas si no se movió significativamente
+            if time.time() - pos['open_time'] > 14400:  # 4 horas
+                if pnl > 0:
+                    self.close_position(symbol, price, 'timeout_profit')
+                elif pnl < -0.005:
+                    self.close_position(symbol, price, 'timeout_loss')
+                else:
+                    self.close_position(symbol, price, 'timeout_neutral')
                 continue
 
 portfolio = Portfolio()

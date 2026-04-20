@@ -1,5 +1,5 @@
 # ============================================
-# CONFIGURACIÓN INSTITUCIONAL - BOT QUANT REAL
+# CONFIGURACIÓN INSTITUCIONAL - VERSIÓN TAKE PROFIT GRANDE
 # ============================================
 
 SIMULATION_MODE = True
@@ -30,27 +30,26 @@ TREND_STRENGTH_THRESHOLD = 25
 ML_RETRAIN_EVERY_TRADES = 30
 ML_MIN_TRADES_FOR_TRAIN = 30
 
-# ========== RIESGO/RECOMPENSA PROFESIONAL ==========
+# ========== RIESGO/RECOMPENSA (CORREGIDO) ==========
 DEFAULT_ATR_PERIOD = 14
-DEFAULT_STOP_MULTIPLIER = 1.2      # Stop loss = 1.5 * ATR
-DEFAULT_TAKE_MULTIPLIER = 6.0      # Take profit = 6.0 * ATR (relación 1:2.67)
-MAX_STOP_PERCENT = 0.03            # Máximo 3%
-MIN_STOP_PERCENT = 0.01            # Mínimo 1%
+DEFAULT_STOP_MULTIPLIER = 1.0        # Stop loss = 1.0 × ATR (más ajustado)
+DEFAULT_TAKE_MULTIPLIER = 10.0       # Take profit = 10.0 × ATR (muy grande)
+MAX_STOP_PERCENT = 0.02              # Stop máximo 2%
+MIN_STOP_PERCENT = 0.005             # Stop mínimo 0.5%
 
-# Trailing stop (se activa después de +2% y sigue con gap del 1%)
-TRAILING_ACTIVATION = 0.005         # 0.5% de ganancia para activar trailing
-TRAILING_GAP = 0.002                # 0.2% de retroceso desde máximo
+# Trailing stop más agresivo
+TRAILING_ACTIVATION = 0.01           # 1% de ganancia para activar
+TRAILING_GAP = 0.005                 # 0.5% de retroceso desde máximo
 
 # ========== GESTIÓN DE CAPITAL ==========
 KELLY_FRACTION = 0.25
 MAX_POSITION_SIZE_PCT = 0.15
-MIN_POSITION_SIZE_PCT = 0.1
+MIN_POSITION_SIZE_PCT = 0.03
 
 COOLDOWN_BASE = 20
 COOLDOWN_MAX = 60
 COOLDOWN_MIN = 10
 
-# ========== CORRELACIÓN ==========
 CORRELATION_GROUPS = {
     "L1": ["BTC-USD", "ETH-USD"],
     "L2": ["SOL-USD"],
@@ -58,7 +57,7 @@ CORRELATION_GROUPS = {
     "MEME": ["DOGE-USD"],
 }
 
-# ========== UMBRALES EXIGENTES (solo señales de calidad) ==========
+# ========== UMBRALES DE SEÑAL (moderados) ==========
 SIGNAL_MIN_PROBABILITY = 0.55
 SIGNAL_MIN_SCORE = 0.60
 

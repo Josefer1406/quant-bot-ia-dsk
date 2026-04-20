@@ -32,19 +32,19 @@ ML_MIN_TRADES_FOR_TRAIN = 30
 
 # ========== RIESGO/RECOMPENSA PROFESIONAL ==========
 DEFAULT_ATR_PERIOD = 14
-DEFAULT_STOP_MULTIPLIER = 1.5      # Stop loss = 1.5 * ATR
-DEFAULT_TAKE_MULTIPLIER = 4.0      # Take profit = 4.0 * ATR (relación 1:2.67)
-MAX_STOP_PERCENT = 0.05            # Máximo 5%
+DEFAULT_STOP_MULTIPLIER = 1.2      # Stop loss = 1.5 * ATR
+DEFAULT_TAKE_MULTIPLIER = 6.0      # Take profit = 6.0 * ATR (relación 1:2.67)
+MAX_STOP_PERCENT = 0.03            # Máximo 3%
 MIN_STOP_PERCENT = 0.01            # Mínimo 1%
 
 # Trailing stop (se activa después de +2% y sigue con gap del 1%)
-TRAILING_ACTIVATION = 0.02         # 2% de ganancia para activar trailing
-TRAILING_GAP = 0.01                # 1% de retroceso desde máximo
+TRAILING_ACTIVATION = 0.005         # 0.5% de ganancia para activar trailing
+TRAILING_GAP = 0.002                # 0.2% de retroceso desde máximo
 
 # ========== GESTIÓN DE CAPITAL ==========
 KELLY_FRACTION = 0.25
 MAX_POSITION_SIZE_PCT = 0.15
-MIN_POSITION_SIZE_PCT = 0.03
+MIN_POSITION_SIZE_PCT = 0.1
 
 COOLDOWN_BASE = 20
 COOLDOWN_MAX = 60

@@ -59,8 +59,8 @@ CORRELATION_GROUPS = {
 }
 
 # ========== UMBRALES EXIGENTES (solo señales de calidad) ==========
-SIGNAL_MIN_PROBABILITY = 0.65
-SIGNAL_MIN_SCORE = 0.70
+SIGNAL_MIN_PROBABILITY = 0.55
+SIGNAL_MIN_SCORE = 0.60
 
 MODEL_PATH = "xgboost_model.pkl"
 SCALER_PATH = "scaler.pkl"

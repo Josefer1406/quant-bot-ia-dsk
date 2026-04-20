@@ -125,13 +125,12 @@ class Portfolio:
             
             # 3. Trailing stop (solo si se superó la activación)
             if pnl >= config.TRAILING_ACTIVATION:
-                # Actualizar máximo precio alcanzado
                 if price > pos.get('max_price', pos['entry']):
                     pos['max_price'] = price
-                # Trailing gap dinámico: más agresivo si la ganancia es grande
+                # Gap dinámico: más agresivo si la ganancia es grande
                 gap = config.TRAILING_GAP
-                if pnl > 0.03:  # si ganancia > 3%
-                    gap = 0.003  # 0.3%
+                if pnl > 0.03:
+                    gap = 0.003
                 trailing_stop = pos['max_price'] * (1 - gap)
                 if price <= trailing_stop:
                     self.close_position(symbol, price, 'trailing_stop')
@@ -141,8 +140,8 @@ class Portfolio:
                 if price > pos.get('max_price', pos['entry']):
                     pos['max_price'] = price
             
-            # 4. Timeout: cerrar después de 4 horas si no se movió significativamente
-            if time.time() - pos['open_time'] > 14400:  # 4 horas
+            # 4. Timeout después de 4 horas si no se movió
+            if time.time() - pos['open_time'] > 14400:
                 if pnl > 0:
                     self.close_position(symbol, price, 'timeout_profit')
                 elif pnl < -0.005:

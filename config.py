@@ -42,8 +42,9 @@ MAX_STOP_PERCENT = 0.02
 MIN_STOP_PERCENT = 0.005
 MIN_TAKE_PERCENT = 0.015             # NUEVO: Take profit mínimo del 1.5%
 
-TRAILING_ACTIVATION = 0.02          # Antes 0.01 (2% en lugar de 1%)
-TRAILING_GAP = 0.008                 # Antes 0.005 (0.8% en lugar de 0.5%)
+# TRAILING más amplio para capturar tendencias
+TRAILING_ACTIVATION = 0.025          # Se activa al 2.5% de ganancia
+TRAILING_GAP = 0.015                 # Gap del 1.5% para dejar respirar
 
 KELLY_FRACTION = 0.25
 MAX_POSITION_SIZE_PCT = 0.16
